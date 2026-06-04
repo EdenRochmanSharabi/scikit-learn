@@ -1052,15 +1052,14 @@ class Nystroem(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator)
 
         kernel_params = self._get_kernel_params()
 
-        if self.kernel == "precomputed":
-            basis_kernel = X[np.ix_(basis_inds, basis_inds)]
-            basis = None
+        if sp.issparse(X):
+            basis = X[basis_inds]
         else:
-            if sp.issparse(X):
-                basis = X[basis_inds]
-            else:
-                basis = _safe_indexing(X, basis_inds, axis=0)
+            basis = _safe_indexing(X, basis_inds, axis=0)
 
+        if self.kernel == "precomputed":
+            basis_kernel = xp.take(basis, basis_inds, axis=1)
+        else:
             basis_kernel = pairwise_kernels(
                 basis,
                 metric=self.kernel,
@@ -1102,7 +1101,7 @@ class Nystroem(ClassNamePrefixFeaturesOutMixin, TransformerMixin, BaseEstimator)
         X = validate_data(self, X, accept_sparse="csr", reset=False)
 
         if self.kernel == "precomputed":
-            embedded = X[:, self.component_indices_]
+            embedded = xp.take(X, self.component_indices_, axis=1)
         else:
             kernel_params = self._get_kernel_params()
             embedded = pairwise_kernels(

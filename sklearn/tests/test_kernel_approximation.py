@@ -506,7 +506,7 @@ def test_nystroem_precomputed_kernel_subsample():
     X_transformed2 = nystroem.transform(K)
     assert_array_almost_equal(X_transformed, X_transformed2)
 
-    assert nystroem.components_ is None
+    assert nystroem.components_.shape == (n_components, 50)
 
 
 def test_nystroem_component_indices():
